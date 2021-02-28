@@ -8,6 +8,8 @@ authors = ["ATTY Lionel <lionel.atty@365talents.com>"]
 python = "^3.7.3"
 youtube_dl = "^2020.11.12"
 humanfriendly = "^8.2"
+typer = {extras = ["all"], version = "^0.3.2"}
+click-spinner = "^0.1.10"
 
 [tool.poetry.dev-dependencies]
 
