@@ -54,8 +54,8 @@ gnuplot -p -e 'set title "Youtube SpeedTest"; set xlabel "Time (s)"; set ylabel 
 # Run with script shell
 
 ```sh
-[debian] in ~/PycharmProjects/youtube_speedtest is 📦 v0.1.0 via 🐍 v3.7.3 (youtube-speedtest-RBxHy8ti-py3.7) via 🐏 45%|0% 
-🕙[ 12:33:40 ] ➜ /usr/bin/zsh [...]/youtube_speedtest/run_speedtest_youtube.sh
+[debian] in ~/PycharmProjects/speedtest_youtube is 📦 v0.1.0 via 🐍 v3.7.3 (youtube-speedtest-RBxHy8ti-py3.7) via 🐏 45%|0% 
+🕙[ 12:33:40 ] ➜ /usr/bin/zsh [...]/speedtest_youtube/run_speedtest_youtube.sh
 
                                                                                                                         
                                                                Youtube SpeedTest                                        
