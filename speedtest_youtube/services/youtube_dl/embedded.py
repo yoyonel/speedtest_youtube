@@ -55,7 +55,7 @@ class HookLogger:
         typer.echo(msg)
 
 
-def yt_dl_embed(
+def using_embedded(
         yt_uri: str,
         yt_country: str,
         show_progress_bar: bool,

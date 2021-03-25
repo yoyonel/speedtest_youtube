@@ -16,7 +16,7 @@ regex = r"\[download\][ ]{1,}(?P<percent>\d+(?:\.\d+)?)%[ ]{1,}of[ ]{1,}(?P<tota
 stdout_capture_streaming = io.StringIO()
 
 
-def yt_dl_capture_exit():
+def hook_capture_exit():
     yt_dl_stdout = stdout_capture_streaming.getvalue()
     # https://www.regular-expressions.info/named.html
     # https://regex101.com/r/q0fbm4/2
@@ -26,7 +26,7 @@ def yt_dl_capture_exit():
     show_results_in_table(map(YoutubeDownloadSample.from_match_re, matches))
 
 
-def yt_dl_cli(
+def using_cli(
         yt_uri: str,
         yt_country: str,
         yt_dl_options: str,
@@ -37,7 +37,7 @@ def yt_dl_cli(
     with redirect_stdout(stdout_capture_streaming) as capture:
         with click_spinner.spinner():
             # https://docs.python.org/3/library/atexit.html
-            atexit.register(yt_dl_capture_exit)
+            atexit.register(hook_capture_exit)
 
             @timeout_decorator.timeout(seconds=timeout_seconds)
             def _call_youtube_dl():
@@ -47,5 +47,5 @@ def yt_dl_cli(
                 _call_youtube_dl()
             except timeout_decorator.TimeoutError:
                 typer.echo("Timeout")
-                atexit.unregister(yt_dl_capture_exit)
-    yt_dl_capture_exit()
+                atexit.unregister(hook_capture_exit)
+    hook_capture_exit()
