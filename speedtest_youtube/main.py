@@ -19,8 +19,8 @@ def speedtest_youtube(
         show_information: bool = False,
         timeout_seconds: Optional[float] = 10
 ):
-    hook_logger = yt_dl_embed(yt_uri, yt_country, show_progress_bar, show_information, timeout_seconds)
-    show_results_in_table(hook_logger.dl_rates)
+    process_hook = yt_dl_embed(yt_uri, yt_country, show_progress_bar, show_information, timeout_seconds)
+    show_results_in_table(process_hook.dl_samples)
 
 
 @app.command()

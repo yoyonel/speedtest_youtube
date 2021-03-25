@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
-from functools import partial
 from pprint import pformat
-from typing import List, Tuple, Optional
+from typing import List, Optional, Dict
 
 import click
 import timeout_decorator
@@ -9,17 +8,37 @@ import typer
 import youtube_dl
 from click._termui_impl import ProgressBar
 
+from speedtest_youtube.models.ytdl_sample import YoutubeDownloadSample
+
 
 @dataclass
-class HookLogger:
+class ProgressHook:
     bar: ProgressBar
 
-    dl_rates: List[Tuple[float, float]] = field(init=False, default_factory=list)
+    dl_samples: List[YoutubeDownloadSample] = field(init=False, default_factory=list)
     last_percent: float = field(init=False, default=0.0)
 
     def __post_init__(self):
-        self.bar.item_show_func = lambda x: f"download rate: {round((self.dl_rates[-1][1] if self.dl_rates else 0) / (1024 * 1024), 2)} MB/s"
+        # function hook for progress bar
+        self.bar.item_show_func = lambda x: f"download rate: {round((self.dl_samples[-1].dl_rate if self.dl_samples else 0) / (1024 * 1024), 2)} MB/s"
 
+    def hook_callback(self, hook_progress_status: Dict) -> None:
+        process_hook = self
+        status = hook_progress_status.get("status")
+        if status == "downloading":
+            speed_rate = hook_progress_status.get("speed")
+            if speed_rate:
+                percent_dl = float(hook_progress_status["_percent_str"].split("%")[0])
+                diff_percent_dl = percent_dl - process_hook.last_percent
+                process_hook.last_percent = percent_dl
+                process_hook.bar.update(diff_percent_dl)
+                process_hook.dl_samples.append(YoutubeDownloadSample(percent_dl, speed_rate, hook_progress_status.get("downloaded_bytes")))
+        # elif status == "finished":
+        #     pass
+
+
+@dataclass
+class HookLogger:
     def debug(self, msg):
         # matches = re.finditer(regex, msg, re.MULTILINE)
         # for yt_dl_sample in (YoutubeDownloadSample.from_match_re(match) for match in matches):
@@ -42,7 +61,7 @@ def yt_dl_embed(
         show_progress_bar: bool,
         show_information: bool,
         timeout_seconds: Optional[float]
-) -> HookLogger:
+) -> ProgressHook:
     with typer.progressbar(
             label="Youtube download monitoring",
             bar_template='%(label)s  %(bar)s | %(info)s',
@@ -51,7 +70,8 @@ def yt_dl_embed(
             length=100,
             file=None if show_progress_bar else "/dev/null"
     ) as bar:
-        hook_logger = HookLogger(bar)
+        hook_logger = HookLogger()
+        progress_hook = ProgressHook(bar)
         ydl_opts = {
             "format": "best",
             "nopart": True,
@@ -60,7 +80,7 @@ def yt_dl_embed(
             "geo_bypass_country": yt_country,
             "outtmpl": "/dev/null",
             'logger': hook_logger,
-            'progress_hooks': [partial(hook_callback, logger=hook_logger)],
+            'progress_hooks': [progress_hook.hook_callback]
         }
 
         @timeout_decorator.timeout(seconds=timeout_seconds)
@@ -74,20 +94,5 @@ def yt_dl_embed(
         try:
             _perform_download()
         except timeout_decorator.TimeoutError:
-            typer.echo(f"\nTimeout(<={timeout_seconds}): cancel download")
-        return hook_logger
-
-
-def hook_callback(d, logger):
-    status = d.get("status")
-    if status == "downloading":
-        speed_rate = d["speed"]
-        if speed_rate:
-            percent_dl = float(d["_percent_str"].split("%")[0])
-            diff_percent_dl = percent_dl - logger.last_percent
-            logger.last_percent = percent_dl
-            logger.bar.update(diff_percent_dl)
-            logger.dl_rates.append((percent_dl, speed_rate))
-    elif status == "finished":
-        # typer.echo(pformat(logger.dl_rates))
-        pass
+            typer.echo(f"\nTimeout: benchmarking exceed {timeout_seconds}s -> cancel")
+        return progress_hook
