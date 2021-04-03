@@ -11,9 +11,10 @@ console = Console()
 def show_results_in_table(samples: Iterable[YoutubeDownloadSample]) -> None:
     # show results
     table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("UTC Timestamp")
     table.add_column("% Completion")
     table.add_column("Download rate (Mbps)", justify="right")
     for sample in samples:
-        table.add_row(str(sample.percent), f"{sample.dl_rate:.2F}")
+        table.add_row(str(sample.utc_timestamp), str(sample.percent), f"{sample.dl_rate:.2F}")
     console.print()
     console.print(table)

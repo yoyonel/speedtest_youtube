@@ -20,7 +20,7 @@ class ProgressHook:
 
     def __post_init__(self):
         # function hook for progress bar
-        self.bar.item_show_func = lambda x: f"download rate: {round((self.dl_samples[-1].dl_rate if self.dl_samples else 0) / (1024 * 1024), 2)} MB/s"
+        self.bar.item_show_func = lambda x: f"download rate: {(self.dl_samples[-1].dl_rate if self.dl_samples else 0)} MB/s"
 
     def hook_callback(self, hook_progress_status: Dict) -> None:
         process_hook = self
@@ -32,7 +32,7 @@ class ProgressHook:
                 diff_percent_dl = percent_dl - process_hook.last_percent
                 process_hook.last_percent = percent_dl
                 process_hook.bar.update(diff_percent_dl)
-                process_hook.dl_samples.append(YoutubeDownloadSample(percent_dl, speed_rate, hook_progress_status.get("downloaded_bytes")))
+                process_hook.dl_samples.append(YoutubeDownloadSample(percent_dl, round(speed_rate / 1024 / 1024, 2), hook_progress_status.get("downloaded_bytes")))
         # elif status == "finished":
         #     pass
 
@@ -89,7 +89,12 @@ def using_embedded(
                 if show_information:
                     info_dict = ydl.extract_info(yt_uri, download=False)
                     typer.echo(pformat(info_dict))
-                ydl.download([f'https://www.youtube.com/watch?v={yt_uri}'])
+                yt_url = f'https://www.youtube.com/watch?v={yt_uri}'
+                typer.echo(f"INFO: yt_url={yt_url}")
+                try:
+                    ydl.download([yt_url])
+                except:
+                    typer.echo("FATAL: DownloadError")
 
         try:
             _perform_download()
