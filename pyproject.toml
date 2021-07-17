@@ -2,7 +2,7 @@
 name = "speedtest_youtube"
 version = "0.1.0"
 description = ""
-authors = ["ATTY Lionel <lionel.atty@365talents.com>"]
+authors = ["ATTY Lionel <yoyonel@hotmail.com>"]
 
 [tool.poetry.scripts]
 speedtest-youtube = "speedtest_youtube.main:app"
