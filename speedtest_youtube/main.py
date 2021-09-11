@@ -17,10 +17,16 @@ def speedtest_youtube(
         yt_country: str = "FR",
         show_progress_bar: bool = False,
         show_information: bool = False,
+        show_in_table: bool = True,
+        show_in_plt_form: bool = False,
         timeout_seconds: Optional[float] = 10
 ):
     process_hook = using_embedded(yt_uri, yt_country, show_progress_bar, show_information, timeout_seconds)
-    show_results_in_table(process_hook.dl_samples)
+    if show_in_table:
+        show_results_in_table(process_hook.dl_samples)
+    if show_in_plt_form:
+        for dl_sample in process_hook.dl_samples:
+            print(str(dl_sample))
 
 
 @app.command()

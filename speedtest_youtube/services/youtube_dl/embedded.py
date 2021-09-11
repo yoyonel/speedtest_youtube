@@ -90,7 +90,7 @@ def using_embedded(
                     info_dict = ydl.extract_info(yt_uri, download=False)
                     typer.echo(pformat(info_dict))
                 yt_url = f'https://www.youtube.com/watch?v={yt_uri}'
-                typer.echo(f"INFO: yt_url={yt_url}")
+                # typer.echo(f"INFO: yt_url={yt_url}")
                 try:
                     ydl.download([yt_url])
                 except:

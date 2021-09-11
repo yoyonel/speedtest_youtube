@@ -1,4 +1,5 @@
 PROJECT_NAME?=speedtest_youtube
+SCRIPT_NAME?=speedtest-youtube
 #
 DOCKER_TAG?=
 #
@@ -27,9 +28,15 @@ test:
 	@poetry run pytest -v
 
 run-speedtest-youtube:
-	@poetry run speedtest-youtube speedtest-youtube --show-progress-bar
+	@poetry run $(SCRIPT_NAME) speedtest-youtube --show-progress-bar --show-in-table
 
 run-speedtest-external:
-	@poetry run speedtest-youtube speedtest-youtube-external
+	@poetry run $(SCRIPT_NAME) speedtest-youtube-external
+
+/tmp/speedtest_youtube.plt:
+	@poetry run $(SCRIPT_NAME) speedtest-youtube --no-show-in-table --show-in-plt-form > /tmp/speedtest_youtube.plt
+
+gnuplot-speedtest-youtube: /tmp/speedtest_youtube.plt
+	@sh scripts/gnuplot_speedtest_youtube_plt.sh	 
 
 default: env
